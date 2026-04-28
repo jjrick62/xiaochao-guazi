@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>控制台 - 小潮瓜子后台</title>
+  <link rel="stylesheet" href="/admin-style.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="admin-container">
+    <aside class="sidebar">
+      <div class="sidebar-title">管理菜单</div>
+      <nav>
+        <a href="/admin" class="active">控制台</a>
+        <a href="/admin/products">产品管理</a>
+        <a href="/admin/carousels">轮播图管理</a>
+        <a href="/admin/settings">基础设置</a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <h2>控制台</h2>
+      <p class="greeting">欢迎回来，<strong><%= admin %></strong></p>
+
+      <div class="stats-grid">
+        <div class="stat-card" id="statProducts">
+          <div class="stat-number">-</div>
+          <div class="stat-label">产品总数</div>
+        </div>
+        <div class="stat-card" id="statActive">
+          <div class="stat-number">-</div>
+          <div class="stat-label">上架产品</div>
+        </div>
+        <div class="stat-card" id="statCarousels">
+          <div class="stat-number">-</div>
+          <div class="stat-label">轮播图总数</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+        <h3 style="margin-bottom: 10px;">快捷操作</h3>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <a href="/admin/products" class="btn">产品管理</a>
+          <a href="/admin/carousels" class="btn">轮播图管理</a>
+          <a href="/admin/settings" class="btn">基础设置</a>
+          <a href="/" class="btn btn-secondary" target="_blank">查看网站 →</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    fetch('/admin/api/stats')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          document.querySelector('#statProducts .stat-number').textContent = data.data.totalProducts;
+          document.querySelector('#statActive .stat-number').textContent = data.data.activeProducts;
+          document.querySelector('#statCarousels .stat-number').textContent = data.data.totalCarousels;
+        }
+      });
+  </script>
+</body>
+</html>

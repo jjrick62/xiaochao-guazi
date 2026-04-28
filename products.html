@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品展示 - 小潮瓜子</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">小潮瓜子</div>
+            <ul class="nav-menu">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="products.html" class="active">产品展示</a></li>
+                <li><a href="about.html">关于我们</a></li>
+                <li><a href="contact.html">联系我们</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 左侧悬浮导航栏 -->
+    <aside class="side-nav">
+        <ul class="side-nav-list">
+            <li><a href="#melon-seeds" class="side-nav-item">美味瓜子</a></li>
+            <li><a href="#nuts" class="side-nav-item">醇香坚果</a></li>
+            <li><a href="#peanuts" class="side-nav-item">现炒花生</a></li>
+        </ul>
+    </aside>
+
+    <!-- 产品轮播图 -->
+    <section class="product-carousel">
+        <div class="container">
+            <h2 class="section-title">产品展示</h2>
+            <div class="carousel-container">
+                <div class="carousel-wrapper product-carousel-wrapper">
+                    <!-- 产品图片将通过JavaScript动态加载 -->
+                </div>
+                <button class="carousel-btn prev">&lt;</button>
+                <button class="carousel-btn next">&gt;</button>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- 美味瓜子部分 -->
+    <section id="melon-seeds" class="product-section">
+        <div class="container">
+            <h3 class="section-subtitle">美味瓜子</h3>
+            <div class="grid-container" id="melonProductsGrid">
+                <!-- 瓜子产品将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 醇香坚果部分 -->
+    <section id="nuts" class="product-section">
+        <div class="container">
+            <h3 class="section-subtitle">醇香坚果</h3>
+            <div class="grid-container" id="nutProductsGrid">
+                <!-- 坚果产品将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 现炒花生部分 -->
+    <section id="peanuts" class="product-section">
+        <div class="container">
+            <h3 class="section-subtitle">现炒花生</h3>
+            <div class="grid-container" id="peanutProductsGrid">
+                <!-- 花生产品将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 产品网格展示 -->
+    <section class="product-grid">
+        <div class="container">
+            <div class="grid-container" id="productGrid">
+                <!-- 产品将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 产品详情模态框 -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <div class="modal-image">
+                    <img id="modalProductImage" src="" alt="产品图片">
+                </div>
+                <div class="modal-info">
+                    <h3 id="modalProductName">产品名称</h3>
+                    <p id="modalProductPrice">价格：¥0.00</p>
+                    <p id="modalProductDescription">产品描述</p>
+                    <button class="contact-btn">联系购买</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底栏 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-info">
+                <p class="address">地址：三门峡市湖滨区和平路梦之城对面向东 150 米小潮瓜子</p>
+                <p class="phone">电话：13298271296</p>
+            </div>
+            <p class="copyright">© 2024 小潮瓜子 版权所有</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

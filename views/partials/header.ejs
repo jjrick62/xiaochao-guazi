@@ -1,0 +1,18 @@
+<header class="admin-header">
+  <div class="admin-header-inner">
+    <a href="/admin" class="admin-logo">小潮瓜子 · 后台</a>
+    <div class="admin-header-right">
+      <span class="admin-user"><%= admin %></span>
+      <a href="/" target="_blank" class="header-link">前台网站</a>
+      <a href="#" id="logoutBtn" class="header-link logout">退出</a>
+    </div>
+  </div>
+</header>
+
+<script>
+  document.getElementById('logoutBtn')?.addEventListener('click', async function(e) {
+    e.preventDefault();
+    await fetch('/admin/logout', { method: 'POST' });
+    window.location.href = '/admin/login';
+  });
+</script>

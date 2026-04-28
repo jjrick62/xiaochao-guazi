@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>轮播图管理 - 小潮瓜子后台</title>
+  <link rel="stylesheet" href="/admin-style.css">
+  <style>
+    .type-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .type-tab {
+      padding: 8px 20px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .type-tab:hover { border-color: #8B0000; color: #8B0000; }
+    .type-tab.active { background: #8B0000; color: white; border-color: #8B0000; }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="admin-container">
+    <aside class="sidebar">
+      <div class="sidebar-title">管理菜单</div>
+      <nav>
+        <a href="/admin">控制台</a>
+        <a href="/admin/products">产品管理</a>
+        <a href="/admin/carousels" class="active">轮播图管理</a>
+        <a href="/admin/settings">基础设置</a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <div class="toolbar">
+        <h2>轮播图管理</h2>
+        <div class="toolbar-right">
+          <label class="btn" style="cursor:pointer;">
+            + 上传图片
+            <input type="file" id="uploadInput" accept="image/*" style="display:none" onchange="uploadAndAdd()">
+          </label>
+        </div>
+      </div>
+
+      <div class="type-tabs" id="typeTabs">
+        <button class="type-tab active" data-type="home">首页轮播</button>
+        <button class="type-tab" data-type="product">产品页轮播</button>
+        <button class="type-tab" data-type="store">店铺图片</button>
+        <button class="type-tab" data-type="qualification">资质图片</button>
+      </div>
+
+      <div id="carouselGrid" class="carousel-grid">
+        <div class="empty-state"><p>加载中...</p></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentType = 'home';
+    let carousels = [];
+
+    // Load
+    async function loadCarousels() {
+      const res = await fetch('/api/carousels?type=' + currentType);
+      const data = await res.json();
+      if (!data.success) return;
+      carousels = data.data;
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('carouselGrid');
+      if (carousels.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><p>暂无图片</p><button class="btn" onclick="document.getElementById(\'uploadInput\').click()">上传第一张</button></div>';
+        return;
+      }
+      grid.innerHTML = carousels.map(c => `
+        <div class="carousel-card">
+          <img src="${c.image}" alt="轮播图" onerror="this.src='/images/店铺图片/豆包 (13).png'">
+          <div class="card-actions">
+            <span style="color:#999;font-size:12px;">#${c.sort_order}</span>
+            <div>
+              <button class="delete-btn" onclick="deleteCarousel(${c.id})">删除</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Upload
+    async function uploadAndAdd() {
+      const input = document.getElementById('uploadInput');
+      if (!input.files.length) return;
+      const file = input.files[0];
+
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('type', currentType);
+      formData.append('sort_order', carousels.length);
+
+      const res = await fetch('/admin/api/carousels', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        showToast('上传成功');
+        input.value = '';
+        loadCarousels();
+      } else {
+        showToast(data.error || '上传失败', 'error');
+      }
+    }
+
+    // Delete
+    async function deleteCarousel(id) {
+      if (!confirm('确定要删除这张图片吗？')) return;
+      const res = await fetch('/admin/api/carousels/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('删除成功');
+        loadCarousels();
+      } else {
+        showToast(data.error || '删除失败', 'error');
+      }
+    }
+
+    // Tabs
+    document.querySelectorAll('.type-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        currentType = this.dataset.type;
+        loadCarousels();
+      });
+    });
+
+    // Toast
+    function showToast(msg, type = 'success') {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+    }
+
+    loadCarousels();
+  </script>
+</body>
+</html>

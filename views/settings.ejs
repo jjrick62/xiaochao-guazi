@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>基础设置 - 小潮瓜子后台</title>
+  <link rel="stylesheet" href="/admin-style.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="admin-container">
+    <aside class="sidebar">
+      <div class="sidebar-title">管理菜单</div>
+      <nav>
+        <a href="/admin">控制台</a>
+        <a href="/admin/products">产品管理</a>
+        <a href="/admin/carousels">轮播图管理</a>
+        <a href="/admin/settings" class="active">基础设置</a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <h2>基础设置</h2>
+      <p class="greeting">管理店铺的基本信息</p>
+
+      <div class="form-card" style="max-width:700px;">
+        <div class="form-group">
+          <label>店铺地址</label>
+          <input type="text" id="shop_address" placeholder="请输入店铺地址">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>联系电话</label>
+            <input type="text" id="shop_phone" placeholder="请输入电话">
+          </div>
+          <div class="form-group">
+            <label>营业时间</label>
+            <input type="text" id="shop_hours" placeholder="如：早上八点到晚上九点">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>品牌故事</label>
+          <textarea id="brand_story" rows="8" placeholder="请输入品牌故事文案..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>微信二维码</label>
+          <input type="file" id="qrcodeInput" accept="image/*">
+          <div id="qrcodePreview" style="margin-top:8px;max-width:200px;"></div>
+          <input type="hidden" id="qrcode_image">
+          <p style="font-size:12px;color:#999;margin-top:4px;">建议尺寸：300×300px 以上的方形图片</p>
+        </div>
+
+        <button class="btn" onclick="saveSettings()" style="margin-top:8px;">保存设置</button>
+      </div>
+
+      <!-- 修改密码 -->
+      <div class="form-card" style="max-width:700px;margin-top:24px;">
+        <h3 style="margin-bottom:16px;">修改密码</h3>
+        <div class="form-group">
+          <label>当前密码</label>
+          <input type="password" id="oldPassword" placeholder="输入当前密码">
+        </div>
+        <div class="form-group">
+          <label>新密码</label>
+          <input type="password" id="newPassword" placeholder="输入新密码（至少6位）">
+        </div>
+        <button class="btn" onclick="changePassword()">修改密码</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Load settings
+    async function loadSettings() {
+      const res = await fetch('/api/settings');
+      const data = await res.json();
+      if (!data.success) return;
+      const s = data.data;
+      document.getElementById('shop_address').value = s.shop_address || '';
+      document.getElementById('shop_phone').value = s.shop_phone || '';
+      document.getElementById('shop_hours').value = s.shop_hours || '';
+      document.getElementById('brand_story').value = s.brand_story || '';
+      document.getElementById('qrcode_image').value = s.qrcode_image || '';
+      if (s.qrcode_image) {
+        document.getElementById('qrcodePreview').innerHTML = `<img src="${s.qrcode_image}" style="max-width:200px;border-radius:8px;" onerror="this.style.display='none'">`;
+      }
+    }
+
+    // Save settings
+    async function saveSettings() {
+      const data = {
+        shop_address: document.getElementById('shop_address').value,
+        shop_phone: document.getElementById('shop_phone').value,
+        shop_hours: document.getElementById('shop_hours').value,
+        brand_story: document.getElementById('brand_story').value,
+        qrcode_image: document.getElementById('qrcode_image').value,
+      };
+
+      // Upload QR if selected
+      const fileInput = document.getElementById('qrcodeInput');
+      if (fileInput.files.length > 0) {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        const uploadRes = await fetch('/admin/api/upload', { method: 'POST', body: formData });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success) {
+          data.qrcode_image = uploadData.data.url;
+        } else {
+          showToast(uploadData.error || '图片上传失败', 'error');
+          return;
+        }
+      }
+
+      const res = await fetch('/admin/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      if (result.success) {
+        showToast('设置已保存');
+        loadSettings();
+      } else {
+        showToast(result.error || '保存失败', 'error');
+      }
+    }
+
+    // Toast
+    function showToast(msg, type = 'success') {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+    }
+
+    // Change password
+    async function changePassword() {
+      const oldPassword = document.getElementById('oldPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      if (!oldPassword || !newPassword) {
+        showToast('请填写完整', 'error');
+        return;
+      }
+      if (newPassword.length < 6) {
+        showToast('新密码至少6位', 'error');
+        return;
+      }
+      const res = await fetch('/admin/api/change-password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('密码修改成功');
+        document.getElementById('oldPassword').value = '';
+        document.getElementById('newPassword').value = '';
+      } else {
+        showToast(data.error || '修改失败', 'error');
+      }
+    }
+
+    loadSettings();
+  </script>
+</body>
+</html>
